@@ -3,12 +3,10 @@ import pytest
 from xdsl.dialects import llvm
 from xdsl.dialects.builtin import (
     ModuleOp,
-    StringAttr,
-    i8,
     i32,
 )
 from xdsl.dialects.test import TestOp
-from xdsl.ir import Attribute, Block, Region
+from xdsl.ir import Block, Region
 
 ir = pytest.importorskip("llvmlite.ir")
 from xdsl.backend.llvm.convert import convert_module  # noqa: E402
@@ -130,29 +128,3 @@ def test_convert_module_forward_reference():
     assert callee_fn is not None
     assert caller_fn.basic_blocks
     assert callee_fn.basic_blocks
-
-
-@pytest.mark.parametrize(
-    "global_type,value",
-    [
-        # string attribute initializers
-        (llvm.LLVMArrayType(3, i8), StringAttr("Hi\x00")),
-    ],
-)
-def test_convert_global_initializer_not_implemented(
-    global_type: Attribute, value: Attribute
-):
-    global_op = llvm.GlobalOp(
-        global_type,
-        "my_global",
-        "internal",
-        constant=True,
-        value=value,
-    )
-    module = ModuleOp([global_op])
-
-    with pytest.raises(
-        NotImplementedError,
-        match="String global values not yet supported",
-    ):
-        convert_module(module)

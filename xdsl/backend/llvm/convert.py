@@ -132,8 +132,11 @@ def _convert_global(op: llvm.GlobalOp, llvm_module: ir.Module) -> None:
         gvar.global_constant = True
     if op.value is not None:
         if isinstance(op.value, StringAttr):
-            raise NotImplementedError("String global values not yet supported")
-        gvar.initializer = create_constant(op.global_type, op.value)
+            raw = op.value.data.encode("utf-8")
+            arr_type = ir.ArrayType(ir.IntType(8), len(raw))
+            gvar.initializer = ir.Constant(arr_type, bytearray(raw))
+        else:
+            gvar.initializer = create_constant(op.global_type, op.value)
 
 
 def convert_module(
