@@ -2,14 +2,8 @@ import pytest
 
 from xdsl.dialects import llvm
 from xdsl.dialects.builtin import (
-    BytesAttr,
-    DenseIntOrFPElementsAttr,
-    FloatAttr,
-    IntegerAttr,
     ModuleOp,
     StringAttr,
-    TensorType,
-    f64,
     i8,
     i32,
 )
@@ -141,13 +135,6 @@ def test_convert_module_forward_reference():
 @pytest.mark.parametrize(
     "global_type,value",
     [
-        # typed attribute initializers
-        (i32, IntegerAttr(42, 32)),
-        (f64, FloatAttr(3.14, f64)),
-        (
-            llvm.LLVMArrayType(3, i8),
-            DenseIntOrFPElementsAttr(TensorType(i8, [3]), BytesAttr(b"Hi\x00")),
-        ),
         # string attribute initializers
         (llvm.LLVMArrayType(3, i8), StringAttr("Hi\x00")),
     ],
@@ -166,6 +153,6 @@ def test_convert_global_initializer_not_implemented(
 
     with pytest.raises(
         NotImplementedError,
-        match="Global values that are not declarations not yet supported",
+        match="String global values not yet supported",
     ):
         convert_module(module)
